@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "ES2020", // Specifies the ECMAScript target version for compiled JavaScript
+		"useDefineForClassFields": true, // Uses ECMAScript standard class field definitions
+		"module": "ESNext", // Specifies the module code generation
+		"lib": ["ES2020", "DOM", "DOM.Iterable"], // Specifies library files to be included in the compilation
+		"skipLibCheck": true, // Skip type checking of declaration files
+		"moduleResolution": "bundler", // Specifies how TypeScript looks up a file from a given module specifier
+		"allowImportingTsExtensions": true, // Allows importing TypeScript files with .ts extensions
+		"resolveJsonModule": true, // Allows importing JSON files as modules
+		"isolatedModules": true, // Ensures each file can be safely transpiled without relying on other imports
+		"noEmit": true, // Do not emit output (Vite handles the compilation)
+		"strict": true, // Enable all strict type checking options
+		"noUnusedLocals": true, // Report errors on unused locals
+		"noUnusedParameters": true, // Report errors on unused parameters
+		"noFallthroughCasesInSwitch": true // Report errors for fallthrough cases in switch statements
+	},
+	"include": ["js"] // Specifies the files to be included in the compilation
+}
