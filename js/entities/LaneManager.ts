@@ -6,9 +6,11 @@ export class LaneManager {
 	private laneWidth: number;
 	private app: PIXI.Application;
 	private buttons: PIXI.Graphics[] = [];
+	private container: PIXI.Container;
 
-	constructor(app: PIXI.Application) {
+	constructor(app: PIXI.Application, container: PIXI.Container) {
 		this.app = app;
+		this.container = container;
 		this.laneWidth = Settings.getInstance().lane_width;
 		this.createLanes();
 	}
@@ -19,7 +21,7 @@ export class LaneManager {
 		background.beginFill(0x000000);
 		background.drawRect(0, 0, Settings.getInstance().getTotalWidth(), this.app.screen.height);
 		background.endFill();
-		this.app.stage.addChild(background);
+		this.container.addChild(background);
 
 		for (let i = 0; i < Settings.getInstance().lane_count; i++) {
 			const lane = new PIXI.Graphics();
@@ -76,7 +78,7 @@ export class LaneManager {
 			}
 
 			this.lanes.push(lane);
-			this.app.stage.addChild(lane);
+			this.container.addChild(lane);
 		}
 	}
 }

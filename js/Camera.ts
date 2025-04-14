@@ -7,43 +7,12 @@ export class Camera {
 	private target: PIXI.Container | null = null;
 	private bounds: { minX: number; maxX: number } = { minX: 0, maxX: 0 };
 	private isFollowing: boolean = false;
-	private cameraSpeed: number = 10;
+	private cameraSpeed: number = 20; // Increased speed for more noticeable movement
 
 	constructor(app: PIXI.Application) {
 		this.app = app;
 		this.container = new PIXI.Container();
 		app.stage.addChild(this.container);
-
-		// Add keyboard event listeners
-		window.addEventListener('keydown', this.handleKeyDown.bind(this));
-	}
-
-	private handleKeyDown(event: KeyboardEvent): void {
-		// Only handle camera movement if we're not following the player
-		if (!this.isFollowing) {
-			switch (event.key) {
-				case 'ArrowLeft':
-					this.moveLeft();
-					break;
-				case 'ArrowRight':
-					this.moveRight();
-					break;
-			}
-		}
-	}
-
-	private moveLeft(): void {
-		const newX = this.container.x + this.cameraSpeed;
-		if (newX <= this.bounds.minX) {
-			this.container.x = newX;
-		}
-	}
-
-	private moveRight(): void {
-		const newX = this.container.x - this.cameraSpeed;
-		if (newX >= this.bounds.maxX) {
-			this.container.x = newX;
-		}
 	}
 
 	public setTarget(target: PIXI.Container): void {
@@ -52,8 +21,8 @@ export class Camera {
 
 	public setBounds(totalWidth: number): void {
 		this.bounds = {
-			minX: 0,
-			maxX: -(totalWidth - this.app.screen.width)
+			minX: -(totalWidth - this.app.screen.width), // Leftmost position (showing rightmost content)
+			maxX: 0 // Rightmost position (showing leftmost content)
 		};
 	}
 
@@ -74,7 +43,7 @@ export class Camera {
 			const desiredX = -(targetRelativeX - halfScreenWidth);
 
 			// Clamp camera to game bounds
-			this.container.x = Math.max(this.bounds.maxX, Math.min(this.bounds.minX, desiredX));
+			this.container.x = Math.max(this.bounds.minX, Math.min(this.bounds.maxX, desiredX));
 		}
 	}
 

@@ -3,7 +3,6 @@ import { Settings } from '../Settings';
 
 export class Player extends PIXI.Sprite {
 	private app: PIXI.Application;
-	public isCenterScreen: boolean = false;
 	private currentLane: number = 0;
 
 	constructor(texture: PIXI.Texture, app: PIXI.Application) {
@@ -53,10 +52,6 @@ export class Player extends PIXI.Sprite {
 	}
 
 	public update(): void {
-		// Check if player is in the center of the screen
-		const halfScreenWidth = this.app.screen.width / 2;
-		this.isCenterScreen = this.x >= halfScreenWidth;
-
 		// If Settings.lane_current changed, update our position
 		if (this.currentLane !== Settings.getInstance().lane_current) {
 			this.currentLane = Settings.getInstance().lane_current;

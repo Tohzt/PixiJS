@@ -30,25 +30,25 @@ export function initGame(): PIXI.Application {
 	const camera = new Camera(app);
 	console.log('Camera created');
 
-	// Create lanes first (they will be added directly to the stage)
-	const laneManager = new LaneManager(app);
+	// Create lanes first (they will be added to camera container)
+	const laneManager = new LaneManager(app, camera.getContainer());
 	console.log('LaneManager created');
 
-	// Create player and add to stage (on top of lanes)
+	// Create player and add to camera container
 	const playerTexture: PIXI.Texture = PIXI.Texture.from('https://pixijs.com/assets/bunny.png');
 	console.log('Player texture loaded');
 
 	const player = new Player(playerTexture, app);
 	player.y = app.screen.height / 2;
-	app.stage.addChild(player);
-	console.log('Player created and added to stage at position:', player.x, player.y);
+	camera.getContainer().addChild(player);
+	console.log('Player created and added to camera container at position:', player.x, player.y);
 
 	// Set up camera
 	camera.setTarget(player);
 	camera.setBounds(Settings.getInstance().getTotalWidth());
 	console.log('Camera set up with bounds:', Settings.getInstance().getTotalWidth());
 
-	// Add debug text
+	// Add debug text (this stays on the stage, not in camera container)
 	const debugText = new PIXI.Text('Debug View', { fill: 0xffffff });
 	debugText.x = 10;
 	debugText.y = 10;
