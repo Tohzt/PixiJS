@@ -2,63 +2,54 @@ import * as PIXI from 'pixi.js';
 import { Settings } from '../Settings';
 
 export class Player extends PIXI.Sprite {
-	private app: PIXI.Application;
 	private currentLane: number = 0;
+	private targetX: number = 0;
+	private moveSpeed: number = 0.1;
+	private readonly POSITION_THRESHOLD: number = 1;
 
 	constructor(texture: PIXI.Texture, app: PIXI.Application) {
 		super(texture);
-		console.log('Player constructor called');
-		this.app = app;
 		this.anchor.set(0.5);
-		this.x = Settings.getInstance().lane_width / 2; // Start in middle of first lane
+		// Start in the middle of the first lane
+		this.x = Settings.getInstance().getLaneWidth() / 2;
+		this.targetX = this.x;
+		// Set the initial position in Settings
+		Settings.getInstance().setTargetPosition(this.x);
 		this.y = app.screen.height / 2;
 		this.width = 50;
 		this.height = 50;
-		console.log('Player initialized at position:', this.x, this.y);
-
-		// Add keyboard event listeners
-		window.addEventListener('keydown', this.handleKeyDown.bind(this));
 	}
 
-	private handleKeyDown(event: KeyboardEvent): void {
-		switch (event.key.toLowerCase()) {
-			case 'a':
-				this.move_left();
-				break;
-			case 'd':
-				this.move_right();
-				break;
-		}
+	private getLaneWidth(): number {
+		return Settings.getInstance().getLaneWidth();
 	}
 
-	public move_right(): void {
+	public move(): void {
 		if (this.currentLane < Settings.getInstance().lane_count - 1) {
 			this.currentLane++;
-			this.x =
-				this.currentLane * Settings.getInstance().lane_width +
-				Settings.getInstance().lane_width / 2;
-			console.log('Player moved right to lane', this.currentLane, 'at position', this.x);
+			// Calculate target position based on lane width, adding half lane width for center
+			this.targetX = this.currentLane * this.getLaneWidth() + this.getLaneWidth() / 2;
+			Settings.getInstance().setTargetPosition(this.targetX);
 		}
 	}
 
-	public move_left(): void {
-		if (this.currentLane > 0) {
-			this.currentLane--;
-			this.x =
-				this.currentLane * Settings.getInstance().lane_width +
-				Settings.getInstance().lane_width / 2;
-			console.log('Player moved left to lane', this.currentLane, 'at position', this.x);
-		}
+	private hasReachedTarget(): boolean {
+		return Math.abs(this.x - this.targetX) < this.POSITION_THRESHOLD;
 	}
 
 	public update(): void {
-		// If Settings.lane_current changed, update our position
-		if (this.currentLane !== Settings.getInstance().lane_current) {
-			this.currentLane = Settings.getInstance().lane_current;
-			this.x =
-				this.currentLane * Settings.getInstance().lane_width +
-				Settings.getInstance().lane_width / 2;
-			console.log('Player position updated to lane', this.currentLane, 'at position', this.x);
+		// Update target position from Settings
+		this.targetX = Settings.getInstance().getLaneCurrentPosition();
+
+		// Smoothly move towards target position
+		this.x += (this.targetX - this.x) * this.moveSpeed;
+
+		// After moving, check if we've reached the second-to-last lane and our target
+		if (this.currentLane === Settings.getInstance().lane_count - 2 && this.hasReachedTarget()) {
+			this.currentLane = Settings.getInstance().lane_count - 1;
+			Settings.getInstance().lane_current = this.currentLane;
+			this.targetX = this.currentLane * this.getLaneWidth() + this.getLaneWidth() / 2;
+			Settings.getInstance().setTargetPosition(this.targetX);
 		}
 	}
 }

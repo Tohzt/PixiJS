@@ -7,12 +7,54 @@ export class Camera {
 	private target: PIXI.Container | null = null;
 	private bounds: { minX: number; maxX: number } = { minX: 0, maxX: 0 };
 	private isFollowing: boolean = false;
-	private cameraSpeed: number = 20; // Increased speed for more noticeable movement
+	private followSpeed: number = 0.1; // Speed for following (0.1 = 10% of distance per frame)
+	private targetX: number = 0;
+	private zoom: number = 1;
+	private minZoom: number = 0.5;
+	private maxZoom: number = 2;
+	private zoomSpeed: number = 0.1;
+	private lane_count: number = 0;
+	private visible_lanes: number = 0;
 
 	constructor(app: PIXI.Application) {
 		this.app = app;
 		this.container = new PIXI.Container();
 		app.stage.addChild(this.container);
+
+		// Initialize lane properties
+		const settings = Settings.getInstance();
+		this.lane_count = settings.lane_count;
+		this.visible_lanes = settings.visible_lanes;
+
+		// Add mouse wheel event listener
+		if (app.view instanceof HTMLCanvasElement) {
+			app.view.addEventListener('wheel', this.handleWheel.bind(this) as EventListener);
+		}
+	}
+
+	private handleWheel(event: WheelEvent): void {
+		event.preventDefault();
+
+		// Calculate zoom direction (negative for zoom out, positive for zoom in)
+		const zoomDelta = -event.deltaY * this.zoomSpeed * 0.01;
+
+		// Update zoom level
+		this.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoom + zoomDelta));
+
+		// Apply zoom to container
+		this.container.scale.set(this.zoom);
+
+		// Recalculate bounds when zoom changes
+		this.recalculateBounds();
+	}
+
+	private recalculateBounds(): void {
+		const totalWidth = this.app.screen.width * (this.lane_count / this.visible_lanes);
+		const effectiveScreenWidth = this.app.screen.width / this.zoom;
+		this.bounds = {
+			minX: -(totalWidth - effectiveScreenWidth), // Leftmost position (showing rightmost content)
+			maxX: 0 // Rightmost position (showing leftmost content)
+		};
 	}
 
 	public setTarget(target: PIXI.Container): void {
@@ -20,10 +62,7 @@ export class Camera {
 	}
 
 	public setBounds(totalWidth: number): void {
-		this.bounds = {
-			minX: -(totalWidth - this.app.screen.width), // Leftmost position (showing rightmost content)
-			maxX: 0 // Rightmost position (showing leftmost content)
-		};
+		this.recalculateBounds();
 	}
 
 	public update(): void {
@@ -37,13 +76,16 @@ export class Camera {
 			this.isFollowing = true;
 		}
 
-		// If following, move camera to keep player at middle
+		// If following, calculate target position to keep player at middle
 		if (this.isFollowing) {
 			// Calculate desired camera position to keep player centered
-			const desiredX = -(targetRelativeX - halfScreenWidth);
+			this.targetX = -(targetRelativeX - halfScreenWidth);
 
-			// Clamp camera to game bounds
-			this.container.x = Math.max(this.bounds.minX, Math.min(this.bounds.maxX, desiredX));
+			// Clamp target position to game bounds
+			this.targetX = Math.max(this.bounds.minX, Math.min(this.bounds.maxX, this.targetX));
+
+			// Smoothly move towards target position
+			this.container.x += (this.targetX - this.container.x) * this.followSpeed;
 		}
 	}
 

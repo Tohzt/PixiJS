@@ -1,28 +1,24 @@
 import * as PIXI from 'pixi.js';
 import { Settings } from '../Settings';
+import { LaneButton } from './LaneButton';
 
 export class LaneManager {
 	private lanes: PIXI.Graphics[] = [];
 	private laneWidth: number;
 	private app: PIXI.Application;
-	private buttons: PIXI.Graphics[] = [];
+	private buttons: LaneButton[] = [];
 	private container: PIXI.Container;
 
 	constructor(app: PIXI.Application, container: PIXI.Container) {
 		this.app = app;
 		this.container = container;
-		this.laneWidth = Settings.getInstance().lane_width;
+		this.laneWidth = this.app.screen.width / Settings.getInstance().visible_lanes;
+		Settings.getInstance().setLaneWidth(this.laneWidth);
+		Settings.getInstance().reset();
 		this.createLanes();
 	}
 
 	private createLanes(): void {
-		// Create a background for the entire game area
-		const background = new PIXI.Graphics();
-		background.beginFill(0x000000);
-		background.drawRect(0, 0, Settings.getInstance().getTotalWidth(), this.app.screen.height);
-		background.endFill();
-		this.container.addChild(background);
-
 		for (let i = 0; i < Settings.getInstance().lane_count; i++) {
 			const lane = new PIXI.Graphics();
 			const isGreenLane = i === 0 || i === Settings.getInstance().lane_count - 1;
@@ -55,24 +51,12 @@ export class LaneManager {
 
 			// Create and position button
 			if (i != 0 && i != Settings.getInstance().lane_count - 1) {
-				const button = new PIXI.Graphics();
-				button.beginFill(0xff0000); // Red button for visibility
-				const buttonSize = 40;
-				button.drawRect(0, 0, buttonSize, buttonSize);
-				button.endFill();
-				button.x = (this.laneWidth - buttonSize) / 2;
-				button.y = this.app.screen.height / 2 - 100 - buttonSize / 2;
-				button.eventMode = 'static';
-				button.cursor = 'pointer';
-
-				// Add click handler
-				button.on('pointerdown', () => {
-					if (i == Settings.getInstance().lane_current + 1) {
-						Settings.getInstance().lane_current = i;
-						button.destroy();
-					}
-				});
-
+				const button = new LaneButton(i);
+				const buttonSize = 50;
+				button.setPosition(
+					(this.laneWidth - buttonSize) / 2,
+					this.app.screen.height / 2 + buttonSize
+				);
 				lane.addChild(button);
 				this.buttons.push(button);
 			}

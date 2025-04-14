@@ -1,15 +1,13 @@
 export class Settings {
 	private static instance: Settings;
-	public lane_width: number;
 	public lane_current: number;
 	public lane_count: number = 10;
 	public visible_lanes: number = 5;
+	private lane_width: number = 0;
+	private lane_current_position: number = 0;
 
 	private constructor() {
-		// Calculate lane width based on screen width and visible lanes
-		this.lane_width = 800 / this.visible_lanes; // Using fixed width of 800 to match app width
 		this.lane_current = 0;
-		console.log(`Lane width: ${this.lane_width}`);
 	}
 
 	public static getInstance(): Settings {
@@ -19,9 +17,29 @@ export class Settings {
 		return Settings.instance;
 	}
 
+	public reset(): void {
+		this.lane_current = 0;
+		this.lane_current_position = this.lane_width / 2;
+	}
+
 	public getTotalWidth(): number {
-		const totalWidth = this.lane_count * this.lane_width;
-		console.log(`Total game width: ${totalWidth}`);
-		return totalWidth;
+		const container = document.getElementById('game-container');
+		return container ? container.clientWidth * this.lane_count : 0;
+	}
+
+	public setLaneWidth(width: number): void {
+		this.lane_width = width;
+	}
+
+	public getLaneWidth(): number {
+		return this.lane_width;
+	}
+
+	public setTargetPosition(position: number): void {
+		this.lane_current_position = position;
+	}
+
+	public getLaneCurrentPosition(): number {
+		return this.lane_current_position;
 	}
 }

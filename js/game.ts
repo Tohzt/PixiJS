@@ -5,67 +5,59 @@ import { Camera } from './Camera';
 import { Settings } from './Settings';
 
 export function initGame(): PIXI.Application {
-	console.log('Initializing game...');
-
-	// Create the application
-	const app: PIXI.Application = new PIXI.Application({
-		width: 800,
-		height: 600,
-		backgroundColor: 0x1099bb,
-		resolution: window.devicePixelRatio || 1
-	});
+	const settings = Settings.getInstance();
 
 	const container = document.getElementById('game-container');
 	if (!container) {
 		throw new Error('Could not find game container element');
 	}
+
+	// Get the actual dimensions of the container
+	const containerWidth = container.clientWidth;
+	const containerHeight = container.clientHeight;
+
+	const app: PIXI.Application = new PIXI.Application({
+		width: containerWidth,
+		height: containerHeight,
+		backgroundColor: 0x1099bb,
+		resolution: window.devicePixelRatio || 1,
+		autoDensity: true,
+		antialias: true // Enable antialiasing for smoother rendering
+	});
+
 	if (!app.view) {
 		throw new Error('PIXI Application failed to initialize');
 	}
 
-	container.appendChild(app.view as unknown as Node);
-	console.log('PIXI application created and view added to container');
+	// Set canvas size to match container
+	const canvas = app.view as HTMLCanvasElement;
+	canvas.style.width = '100%';
+	canvas.style.height = '100%';
+
+	container.appendChild(canvas);
 
 	// Create camera
 	const camera = new Camera(app);
-	console.log('Camera created');
 
 	// Create lanes first (they will be added to camera container)
-	const laneManager = new LaneManager(app, camera.getContainer());
-	console.log('LaneManager created');
+	new LaneManager(app, camera.getContainer());
 
 	// Create player and add to camera container
 	const playerTexture: PIXI.Texture = PIXI.Texture.from('https://pixijs.com/assets/bunny.png');
-	console.log('Player texture loaded');
 
 	const player = new Player(playerTexture, app);
 	player.y = app.screen.height / 2;
 	camera.getContainer().addChild(player);
-	console.log('Player created and added to camera container at position:', player.x, player.y);
 
 	// Set up camera
 	camera.setTarget(player);
-	camera.setBounds(Settings.getInstance().getTotalWidth());
-	console.log('Camera set up with bounds:', Settings.getInstance().getTotalWidth());
-
-	// Add debug text (this stays on the stage, not in camera container)
-	const debugText = new PIXI.Text('Debug View', { fill: 0xffffff });
-	debugText.x = 10;
-	debugText.y = 10;
-	app.stage.addChild(debugText);
-	console.log('Debug text added');
+	camera.setBounds(settings.getTotalWidth());
 
 	// Game loop
 	app.ticker.add(() => {
 		player.update();
 		camera.update();
-
-		// Update debug text
-		debugText.text = `Player X: ${player.x.toFixed(2)}\nCamera X: ${camera
-			.getContainer()
-			.x.toFixed(2)}\nPlayer Lane: ${Settings.getInstance().lane_current}`;
 	});
-	console.log('Game loop started');
 
 	return app;
 }
