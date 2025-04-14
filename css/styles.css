@@ -8,3 +8,17 @@ body {
 canvas {
 	display: block;
 }
+
+#app {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#game-container {
+	width: fit-content;
+	height: fit-content;
+	background-color: #ff0000;
+}
