@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import type { Application } from 'pixi.js';
 
 export const useMainStore = defineStore('main', () => {
 	const app = ref<Application | null>(null);
 	const isGameActive = ref(false);
+	const betValue = ref(0);
 	const isAuto = ref(false);
-	// betValue can be any number (int or float)
-	const betValue = ref<number>(0);
 
 	const setApp = (newApp: Application) => {
 		app.value = newApp;
