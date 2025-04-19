@@ -30,6 +30,7 @@ export class Player extends PIXI.Sprite {
 			// Calculate target position based on lane width, adding half lane width for center
 			this.targetX = this.currentLane * this.getLaneWidth() + this.getLaneWidth() / 2;
 			Settings.getInstance().setTargetPosition(this.targetX);
+			Settings.getInstance().lane_current = this.currentLane;
 		}
 	}
 
@@ -40,6 +41,7 @@ export class Player extends PIXI.Sprite {
 	public update(): void {
 		// Update target position from Settings
 		this.targetX = Settings.getInstance().getLaneCurrentPosition();
+		this.currentLane = Settings.getInstance().lane_current;
 
 		// Smoothly move towards target position
 		this.x += (this.targetX - this.x) * this.moveSpeed;

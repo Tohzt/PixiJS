@@ -40,7 +40,7 @@ export function initGame(): PIXI.Application {
 	const camera = new Camera(app);
 
 	// Create lanes first (they will be added to camera container)
-	new LaneManager(app, camera.getContainer());
+	const laneManager = new LaneManager(app, camera.getContainer());
 
 	// Create player and add to camera container
 	const playerTexture: PIXI.Texture = PIXI.Texture.from('https://pixijs.com/assets/bunny.png');
@@ -54,9 +54,10 @@ export function initGame(): PIXI.Application {
 	camera.setBounds(settings.getTotalWidth());
 
 	// Game loop
-	app.ticker.add(() => {
+	app.ticker.add((delta) => {
 		player.update();
 		camera.update();
+		laneManager.update(delta); // Add lane manager update with delta time
 	});
 
 	return app;

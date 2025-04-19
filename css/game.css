@@ -9,10 +9,12 @@ canvas {
 	max-width: 600px;
 	min-width: 300px;
 	margin: 0 auto;
-	background-color: #000;
-	border-radius: 8px;
+	padding: 10px;
+	background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
+	border-radius: 32px;
 	overflow: hidden;
 	position: relative;
+	border: 1px solid #fff;
 }
 
 /* Aspect ratio container */
@@ -20,21 +22,27 @@ canvas {
 	content: '';
 	display: block;
 	padding-bottom: 56.25%; /* 16:9 aspect ratio */
+	background: #000;
+	border-radius: 22px; /* slightly smaller to account for padding */
 }
 
 /* Position canvas absolutely within the container */
 #game-container canvas {
 	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100% !important;
-	height: 100% !important;
+	top: 10px;
+	left: 10px;
+	right: 10px;
+	bottom: 10px;
+	border: 2px solid #000;
+	width: calc(100% - 24px) !important;
+	height: calc(100% - 24px) !important;
+	border-radius: 22px;
 }
 
-/* Prevent default touch behaviors and text selection for game elements */
-#game-container * {
-	touch-action: none;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	user-select: none;
+#input-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
 }

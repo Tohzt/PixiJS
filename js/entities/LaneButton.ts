@@ -1,11 +1,13 @@
 import * as PIXI from 'pixi.js';
 import { Settings } from '../Settings';
+import { useMainStore } from '../../src/store';
 
 export class LaneButton extends PIXI.Container {
 	private button: PIXI.Graphics;
 	private buttonText: PIXI.Text;
 	private readonly buttonSize: number = 50;
 	public readonly laneIndex: number;
+	private store: any;
 
 	constructor(laneIndex: number) {
 		super();
@@ -16,6 +18,7 @@ export class LaneButton extends PIXI.Container {
 			fontSize: 24,
 			fontWeight: 'bold'
 		});
+		this.store = useMainStore();
 		this.createButton();
 		this.setupInteractivity();
 	}
@@ -44,7 +47,9 @@ export class LaneButton extends PIXI.Container {
 
 		// Hover effects
 		this.on('pointerover', () => {
-			this.button.tint = 0xcccccc;
+			if (this.store.isGameActive) {
+				this.button.tint = 0xcccccc;
+			}
 		});
 
 		this.on('pointerout', () => {
@@ -53,12 +58,11 @@ export class LaneButton extends PIXI.Container {
 
 		// Click handler
 		this.on('pointerdown', () => {
-			if (this.laneIndex === Settings.getInstance().lane_current + 1) {
+			if (this.store.isGameActive && this.laneIndex === Settings.getInstance().lane_current + 1) {
 				// Calculate the world position for this lane, adding half lane width for center
 				const targetX =
 					this.laneIndex * Settings.getInstance().getLaneWidth() +
 					Settings.getInstance().getLaneWidth() / 2;
-				console.log(targetX);
 				// Store the target position in Settings
 				Settings.getInstance().setTargetPosition(targetX);
 				Settings.getInstance().lane_current = this.laneIndex;

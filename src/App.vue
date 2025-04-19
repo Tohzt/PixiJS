@@ -1,30 +1,35 @@
-<template>
-	<div class="game-wrapper">
-		<button class="reset-button" @click="resetGame">Reset Game</button>
-		<div id="game-container"></div>
-	</div>
-</template>
-
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
 import * as PIXI from 'pixi.js';
 import { initGame } from '../js/game';
-import { Settings } from '../js/Settings';
+import { useMainStore } from './store';
 
-let app: PIXI.Application;
+import ToggleManualAuto from './vue components/toggleManualAuto.vue';
+import PlaceBet from './vue components/placeBet.vue';
+import InputBet from './vue components/inputBet.vue';
+import ResetButton from './vue components/resetButton.vue';
 
-const resetGame = () => {
-	if (app) app.destroy(true);
+const store = useMainStore();
 
-	const container = document.getElementById('game-container');
-	if (container) container.innerHTML = '';
-
-	app = initGame();
-};
-
-onMounted(() => (app = initGame()));
+onMounted(() => {
+	const app = initGame();
+	store.setApp(app);
+});
 
 onUnmounted(() => {
+	const app = store.getApp();
 	if (app) app.destroy(true);
 });
 </script>
+
+<template>
+	<div class="game-wrapper">
+		<div id="input-container">
+			<ToggleManualAuto />
+			<PlaceBet />
+			<InputBet />
+			<ResetButton />
+		</div>
+		<div id="game-container"></div>
+	</div>
+</template>

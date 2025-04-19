@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Settings } from '../Settings';
 import { LaneButton } from './LaneButton';
+import { Enemy } from './Enemy';
 
 export class LaneManager {
 	private lanes: PIXI.Graphics[] = [];
@@ -8,6 +9,10 @@ export class LaneManager {
 	private app: PIXI.Application;
 	private buttons: LaneButton[] = [];
 	private container: PIXI.Container;
+	private enemies: Enemy[] = [];
+	private spawnTimer: number = 0;
+	private readonly spawnInterval: number = 0.15;
+	private readonly spawnChance: number = 0.7;
 
 	constructor(app: PIXI.Application, container: PIXI.Container) {
 		this.app = app;
@@ -64,5 +69,63 @@ export class LaneManager {
 			this.lanes.push(lane);
 			this.container.addChild(lane);
 		}
+	}
+
+	public update(deltaTime: number): void {
+		// Convert deltaTime from milliseconds to seconds
+		const deltaSeconds = deltaTime / 60; // PIXI ticker runs at 60fps
+
+		// Update spawn timer
+		this.spawnTimer += deltaSeconds;
+		if (this.spawnTimer >= this.spawnInterval) {
+			this.spawnTimer = 0;
+			this.trySpawnEnemy();
+		}
+
+		// Update all enemies
+		for (let i = this.enemies.length - 1; i >= 0; i--) {
+			const enemy = this.enemies[i];
+			enemy.update();
+
+			// Remove destroyed enemies
+			if (enemy.destroyed) {
+				this.enemies.splice(i, 1);
+			}
+		}
+	}
+
+	private trySpawnEnemy(): void {
+		// Only spawn if random chance succeeds
+		if (Math.random() > this.spawnChance) {
+			return;
+		}
+
+		// Get current player lane
+		const playerLane = Settings.getInstance().lane_current;
+
+		// Find available lanes (lanes without enemies and not the player's lane)
+		const availableLanes = this.buttons.filter((button) => {
+			return (
+				button.laneIndex !== playerLane &&
+				!this.enemies.some((enemy) => enemy.getLaneIndex() === button.laneIndex)
+			);
+		});
+
+		if (availableLanes.length === 0) {
+			return;
+		}
+
+		// Pick a random available lane
+		const randomIndex = Math.floor(Math.random() * availableLanes.length);
+		const targetButton = availableLanes[randomIndex];
+
+		// Create and add the enemy
+		const enemy = new Enemy(targetButton.laneIndex, targetButton);
+		this.container.addChild(enemy);
+		this.enemies.push(enemy);
+	}
+
+	public getButtons(): LaneButton[] {
+		return this.buttons;
 	}
 }
